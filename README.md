@@ -1,127 +1,116 @@
-# ContractFlow Suite
+# 📌 ContractFlow Suite
+Sistema desktop para gestão de contratos e renovação de licenças, com foco em automação, controle operacional e visão de dados para tomada de decisão.
 
-ContractFlow Suite is a desktop-first contract renewal management product designed to be sold with paid licenses. The repository contains a Windows desktop application built with Electron and a Node.js API that controls authentication, machine-bound licensing, customers, contracts, and dashboard metrics.
+![Preview do ContractFlow Suite](https://raw.githubusercontent.com/Zhennyn/SaaS-ContractFlow/main/img/contractflow-preview.png)
 
-## What is included
+![Status do Projeto](https://img.shields.io/badge/STATUS-EM%20DESENVOLVIMENTO-orange?style=for-the-badge)
 
-- Desktop application ready to package as a Windows `.exe`
-- API with JWT authentication and machine-bound license activation
-- SQLite persistence for demo and local validation
-- Customer and contract CRUD
-- Revenue and renewal dashboard
-- Seed data with a working demo account and license key
+## ✨ Funcionalidades
 
-## Workspace layout
+- 🔐 Autenticação com JWT e controle de acesso por perfil (owner/user)
+- 🖥️ Aplicação desktop empacotada em .exe (Electron)
+- 📄 Gestão completa de clientes e contratos (CRUD)
+- 📅 Monitoramento de vencimentos e renovações prioritárias
+- 📊 Dashboard com métricas de receita recorrente e contratos em risco
+- 🧾 Licenciamento comercial com vínculo por máquina
+- 🔏 Importação e verificação de licença assinada local (.lic)
+- ⚙️ Ferramenta interna para emissão de licenças (CLI)
 
-- `apps/api`: Express API, SQLite persistence, licensing, auth, and business rules
-- `apps/desktop`: Electron + React desktop application
-- `packages/shared`: shared TypeScript contracts
+## 🛠️ Tecnologias Utilizadas
 
-## Environment variables
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Electron](https://img.shields.io/badge/Electron-191970?style=for-the-badge&logo=electron&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge)
+![Cloud Ready](https://img.shields.io/badge/Cloud-Ready-0078D4?style=for-the-badge&logo=microsoftazure&logoColor=white)
 
-- Desktop app (`apps/desktop/.env`):
+## 🚀 Como executar localmente
 
-	```bash
-	VITE_API_URL=https://sua-api-producao.com
-	VITE_LICENSE_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----"
-	```
+Pré-requisitos:
 
-	If `VITE_API_URL` is not provided, the app uses `http://localhost:4000`.
+- Node.js 20+
+- npm 10+
+- Git
 
-## Demo credentials
+Passo a passo:
 
-- Email: `owner@contractflow.local`
-- Password: `admin123`
-- License key: `CFLOW-DEMO-2026`
+1. Clone o repositório
 
-## Run locally
+    git clone https://github.com/Zhennyn/SaaS-ContractFlow.git
+    cd SaaS-ContractFlow
 
-1. Install dependencies:
+2. Instale as dependências
 
-	```bash
-	npm install
-	```
+    npm install
 
-2. Seed demo data:
+3. Gere a base de dados de demonstração
 
-	```bash
-	npm run seed
-	```
+    npm run seed
 
-3. Start the API:
+4. Configure a chave pública no desktop
 
-	```bash
-	npm run dev -w apps/api
-	```
+    Crie o arquivo apps/desktop/.env com:
 
-4. In another terminal, start the desktop app:
+    VITE_API_URL=http://localhost:4000
+    VITE_LICENSE_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAhVbBtQqguLUqruAtl2aKlBAM2TadV5C4otsR7pWm4Yg=\n-----END PUBLIC KEY-----"
 
-	```bash
-	npm run dev -w apps/desktop
-	```
+5. Execute API + Desktop em modo desenvolvimento
 
-5. Login in the desktop app with the demo credentials above.
+    npm run dev
 
-## Build
+6. Acesse com credenciais de teste
 
-- Build all workspaces:
+    Email: owner@contractflow.local
+    Senha: admin123
+    Licença: CFLOW-DEMO-2026
 
-  ```bash
-  npm run build
-  ```
+7. Gerar executável Windows (opcional)
 
-- Generate the Windows executable:
+    npm run package:desktop
 
-  ```bash
-  npm run package:desktop
-  ```
+## 📸 Screenshots
 
-The generated executable is written to `apps/desktop/release/ContractFlow-Suite-1.0.0.exe`.
+O projeto ainda está em desenvolvimento e as capturas serão adicionadas em breve.
 
-## Licensing model
+Sugestões de imagens para incluir na pasta img:
 
-- The user logs in with email, password, and license key.
-- The API binds the license to the first machine identifier that uses it.
-- Future logins from a different machine are blocked.
-- License status and expiration are checked on every authenticated session.
-- Session includes short-lived access token plus refresh token rotation.
-- License administration routes are restricted to users with `owner` role.
+- Tela de login e validação de licença
+- Dashboard principal com métricas
+- Lista de contratos com ações de edição
+- Fluxo de importação de licença assinada
 
-## Offline-first mode (encrypted)
+## 🌐 Demonstração
 
-- After a successful online validation, the desktop app stores an encrypted local cache bound to the machine ID.
-- If the API is temporarily unavailable, the app can operate from this encrypted cache.
-- Test grace period is configured to **30 days** from the last successful online validation.
-- If the grace period expires without online validation, offline access is blocked until the next online login.
-- The dashboard shows notifications for:
-	- upcoming renewal (up to 30 days before expiration)
-	- expired license
-	- remaining offline grace period
+🔗 Em breve: link de demonstração pública
 
-## Internal license issuer (separate tool)
+Sugestão de publicação:
 
-This repository includes an internal CLI issuer in `apps/license-issuer`.
+- API em Azure App Service, Render ou Railway
+- Vídeo curto de demonstração no YouTube/Loom
+- GIF do fluxo principal no topo do README
 
-1. Generate signing keys (run once):
+## 📌 Sobre o projeto
 
-	```bash
-	npm run license:generate-keys -- --outDir keys
-	```
+Desenvolvido em 2026 como projeto de portfólio, o ContractFlow Suite foi criado para simular um produto SaaS desktop comercial de ponta a ponta.
 
-2. Configure desktop public key in `apps/desktop/.env` (`VITE_LICENSE_PUBLIC_KEY`).
+Além da parte de desenvolvimento full stack, este projeto evidencia competências altamente valorizadas em vagas de Suporte TI, Help Desk, Dados e Cloud:
 
-3. Issue a signed license file:
+- Diagnóstico e resolução de incidentes em ambiente desktop/API
+- Automação de processos operacionais (licenciamento e validação)
+- Estruturação e consulta de dados em banco relacional
+- Criação de dashboards para acompanhamento de indicadores
+- Segurança aplicada (autenticação, autorização e assinatura digital)
+- Organização de arquitetura em monorepo com foco em manutenção
 
-	```bash
-	npm run license:issue -- --privateKey keys/private_key.pem --output licenses/acme.lic --customer "Acme LTDA" --plan "Growth Annual" --expiresAt 2027-04-06T23:59:59.000Z --graceDays 30 --machineId <machine-id> --features contracts,renewals,dashboard
-	```
+É um projeto orientado a cenário real, com visão de produto, operação e escalabilidade.
 
-4. In the desktop app, use **Importar licenca assinada (.lic)**.
+---
 
-## Commercialization notes
+Feito com ❤️ por Zhennyn
 
-- For real sales, host `apps/api` on a VPS, Render, Railway, Fly.io, or another backend platform.
-- Replace the SQLite database with PostgreSQL before going to production.
-- Move `JWT_SECRET` and future payment keys to environment variables.
-- Add an admin panel for issuing, suspending, and renewing licenses.
-- Add payment integration such as Stripe, Mercado Pago, or Asaas to automate license lifecycle.
+Contribuições, sugestões e feedbacks são muito bem-vindos.
