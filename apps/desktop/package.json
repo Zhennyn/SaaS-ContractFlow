@@ -1,0 +1,57 @@
+{
+  "name": "@contractflow/desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Desktop contract renewal management app with machine-bound licensing.",
+  "author": "GitHub Copilot",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k \"npm run dev:renderer\" \"npm run dev:electron\"",
+    "dev:renderer": "vite",
+    "dev:electron": "wait-on tcp:5173 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "package": "npm run build && electron-builder --win portable"
+  },
+  "dependencies": {
+    "@contractflow/shared": "1.0.0",
+    "node-machine-id": "^1.1.12",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "37.5.0",
+    "electron-builder": "^26.0.12",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9",
+    "wait-on": "^8.0.5"
+  },
+  "build": {
+    "electronVersion": "37.5.0",
+    "appId": "com.contractflow.desktop",
+    "productName": "ContractFlow Suite",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "artifactName": "ContractFlow-Suite-${version}.exe"
+  }
+}

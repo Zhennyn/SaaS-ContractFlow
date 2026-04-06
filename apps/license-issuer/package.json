@@ -1,0 +1,21 @@
+{
+  "name": "@contractflow/license-issuer",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/cli.js",
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "generate-keys": "tsx src/cli.ts generate-keys",
+    "issue": "tsx src/cli.ts issue"
+  },
+  "dependencies": {
+    "@contractflow/shared": "1.0.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "tsx": "^4.20.6"
+  }
+}

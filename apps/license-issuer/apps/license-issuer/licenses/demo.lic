@@ -1,0 +1,19 @@
+{
+  "alg": "Ed25519",
+  "kid": "9549ff81e467",
+  "payload": {
+    "licenseId": "ad4e7124-7b1e-403e-9f69-45d7e77da888",
+    "customer": "Demo Cliente",
+    "plan": "Growth Annual",
+    "issuedAt": "2026-04-06T15:03:35.080Z",
+    "expiresAt": "2027-04-06T23:59:59.000Z",
+    "graceDays": 30,
+    "machineId": "dev-machine",
+    "features": [
+      "contracts",
+      "renewals",
+      "dashboard"
+    ]
+  },
+  "signature": "N8OZRnOBjV5tYQJl/UVXwsEcIFz36mzQR+a7YSomYLMYIWTlNU37x3yqJ+kLgpaThbe9Vb4OqiSgNjN6g03QBg=="
+}

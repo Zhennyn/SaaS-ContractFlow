@@ -1,0 +1,22 @@
+{
+  "name": "contractflow-suite",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,desktop -c cyan,green \"npm run dev -w apps/api\" \"npm run dev -w apps/desktop\"",
+    "build": "npm run build -w packages/shared && npm run build -w apps/api && npm run build -w apps/desktop && npm run build -w apps/license-issuer",
+    "typecheck": "npm run typecheck -ws --if-present",
+    "seed": "npm run seed -w apps/api",
+    "package:desktop": "npm run package -w apps/desktop",
+    "license:generate-keys": "npm run generate-keys -w apps/license-issuer --",
+    "license:issue": "npm run issue -w apps/license-issuer --"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  }
+}

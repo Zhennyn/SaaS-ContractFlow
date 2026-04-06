@@ -1,0 +1,13 @@
+node_modules/
+dist/
+release/
+coverage/
+*.log
+.env
+.env.local
+apps/api/data/
+apps/desktop/dist/
+apps/desktop/dist-electron/
+apps/desktop/release/
+apps/license-issuer/keys/
+apps/license-issuer/licenses/
