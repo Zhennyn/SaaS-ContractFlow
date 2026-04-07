@@ -50,8 +50,30 @@ const renewalSnoozeStorageKey = 'contractflow-renewal-snooze';
 const renewalIntervalStorageKey = 'contractflow-renewal-interval-minutes';
 const renewalThresholdsStorageKey = 'contractflow-renewal-thresholds';
 const emailSettingsStorageKey = 'contractflow-email-settings';
-const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
-const defaultApiUrl = configuredApiUrl && configuredApiUrl.length > 0 ? configuredApiUrl : 'http://localhost:4000';
+
+// Calcula a URL da API dinamicamente
+async function getInitialApiUrl(): Promise<string> {
+  const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+  const envUrl = configuredApiUrl && configuredApiUrl.length > 0 ? configuredApiUrl : null;
+
+  // Tenta obter a URL do IPC (quando é Electron empacotado)
+  try {
+    if ((window as any).contractFlowDesktop?.getApiUrl) {
+      const ipcUrl = await (window as any).contractFlowDesktop.getApiUrl();
+      return ipcUrl || envUrl || 'http://localhost:4000';
+    }
+  } catch {
+    // Silencioso - pode não estar em Electron
+  }
+
+  return envUrl || 'http://localhost:4000';
+}
+
+let defaultApiUrl = 'http://localhost:4000'; // fallback temporário
+getInitialApiUrl().then(url => {
+  defaultApiUrl = url;
+});
+
 const isDevMode = import.meta.env.DEV;
 const renewalNotifyDays = 30;
 /** Marcos padrão de alerta (em dias antes do vencimento). Pode ser sobrescrito pelo usuário via UI. */

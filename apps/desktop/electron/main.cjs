@@ -1,10 +1,15 @@
 const { app, BrowserWindow, Notification, dialog, ipcMain } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { startApiServer } = require('./start-api-server.cjs');
 
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
 
+// Armazena a URL da API para usar nas janelas
+let apiUrl = process.env.VITE_API_URL || 'http://localhost:4000';
+
 ipcMain.handle('app:get-version', () => app.getVersion());
+ipcMain.handle('app:get-api-url', () => apiUrl);
 
 ipcMain.handle('license:import-file', async () => {
   const result = await dialog.showOpenDialog({
@@ -106,7 +111,17 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Inicia o servidor API embutido em production
+  if (!isDev) {
+    try {
+      apiUrl = await startApiServer();
+    } catch (error) {
+      console.error('Falha ao iniciar servidor API:', error);
+      // Continua mesmo se o servidor falhar, pode conectar a um remoto
+    }
+  }
+
   createWindow();
 
   app.on('activate', () => {
