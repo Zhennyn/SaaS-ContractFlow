@@ -17,13 +17,33 @@ import { uploadService } from './services/upload.service.js';
 initializeDatabase();
 
 const port = Number(process.env.API_PORT ?? 4000);
-const corsOrigin = process.env.CORS_ORIGIN ?? 'http://127.0.0.1:5173';
+const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://127.0.0.1:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 // Inicializa seviço de uploads
 uploadService.initialize().catch(console.error);
 
 const app = express();
-app.use(cors({ origin: corsOrigin }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Electron empacotado (file://) costuma enviar Origin "null".
+      if (!origin || origin === 'null') {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('CORS origin not allowed'));
+    }
+  })
+);
 app.use(express.json());
 app.use(requestLoggerMiddleware);
 
