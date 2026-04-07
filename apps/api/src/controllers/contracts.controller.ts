@@ -4,9 +4,40 @@ import { contractSchema, clmTransitionSchema } from '../validators/contracts.val
 import { contractsService } from '../services/contracts.service.js';
 import { ValidationError } from '../types/errors.js';
 
+function getString(val: any): string | undefined {
+  if (typeof val === 'string') return val;
+  if (Array.isArray(val)) return val[0];
+  return undefined;
+}
+
+function getNumber(val: any, def: number = 0): number {
+  const str = getString(val);
+  return str ? Math.max(0, Number(str)) : def;
+}
+
 export const contractsController = {
   list(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      // Se houver query params de filtro, usa search
+      if (req.query.status || req.query.clmStatus || req.query.search) {
+        const result = contractsService.search(req.auth!.sub, {
+          status: getString(req.query.status),
+          clmStatus: getString(req.query.clmStatus),
+          search: getString(req.query.search),
+          limit: getNumber(req.query.limit, 50),
+          offset: getNumber(req.query.offset, 0)
+        });
+        return res.json({
+          data: result.contracts,
+          pagination: {
+            limit: Math.min(getNumber(req.query.limit, 50), 500),
+            offset: getNumber(req.query.offset, 0),
+            total: result.total
+          }
+        });
+      }
+
+      // Caso contrário, retorna todos (sem paginação, para compatibilidade)
       res.json(contractsService.listForUser(req.auth!.sub));
     } catch (err) {
       next(err);

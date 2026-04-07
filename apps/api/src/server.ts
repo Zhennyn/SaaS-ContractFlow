@@ -11,11 +11,16 @@ import contractsRoutes from './routes/contracts.routes.js';
 import customersRoutes from './routes/customers.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import licensesRoutes from './routes/licenses.routes.js';
+import auditRoutes from './routes/audit.routes.js';
+import { uploadService } from './services/upload.service.js';
 
 initializeDatabase();
 
 const port = Number(process.env.API_PORT ?? 4000);
 const corsOrigin = process.env.CORS_ORIGIN ?? 'http://127.0.0.1:5173';
+
+// Inicializa seviço de uploads
+uploadService.initialize().catch(console.error);
 
 const app = express();
 app.use(cors({ origin: corsOrigin }));
@@ -31,6 +36,7 @@ app.use('/contracts', contractsRoutes);
 app.use('/customers', customersRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/licenses', licensesRoutes);
+app.use('/audit', auditRoutes);
 
 // Legacy /me route (alias to /auth/me)
 // Legacy /me alias kept for desktop client compatibility.

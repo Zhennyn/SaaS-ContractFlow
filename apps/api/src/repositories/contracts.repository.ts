@@ -121,5 +121,68 @@ export const contractsRepository = {
 
   delete(id: string, userId: string): number {
     return db.prepare('DELETE FROM contracts WHERE id = ? AND user_id = ?').run(id, userId).changes;
+  },
+
+  /**
+   * Busca contratos com filtros, busca por título e pagination
+   */
+  findWithFilters(
+    userId: string,
+    options: {
+      status?: ContractStatus;
+      clmStatus?: ContractClmStatus;
+      search?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): { contracts: Contract[]; total: number } {
+    const { status, clmStatus, search, limit = 50, offset = 0 } = options;
+
+    let whereConditions = ['contracts.user_id = ?'];
+    const params: any[] = [userId];
+
+    if (status) {
+      whereConditions.push('contracts.status = ?');
+      params.push(status);
+    }
+
+    if (clmStatus) {
+      whereConditions.push('contracts.clm_status = ?');
+      params.push(clmStatus);
+    }
+
+    if (search) {
+      whereConditions.push(
+        "(contracts.title LIKE ? OR contracts.description LIKE ? OR customers.name LIKE ?)"
+      );
+      const searchTerm = `%${search}%`;
+      params.push(searchTerm, searchTerm, searchTerm);
+    }
+
+    const whereClause = whereConditions.join(' AND ');
+
+    // Conta total
+    const countStmt = db.prepare(
+      `SELECT COUNT(*) as count FROM contracts
+       JOIN customers ON customers.id = contracts.customer_id
+       WHERE ${whereClause}`
+    );
+    const countResult = countStmt.get(...params) as { count: number };
+    const total = countResult.count;
+
+    // Busca com paginação
+    const query = `SELECT contracts.*, customers.name as customer_name
+      FROM contracts
+      JOIN customers ON customers.id = contracts.customer_id
+      WHERE ${whereClause}
+      ORDER BY contracts.renewal_date ASC
+      LIMIT ? OFFSET ?`;
+
+    const rows = db.prepare(query).all(...params, limit, offset) as ContractRow[];
+
+    return {
+      contracts: rows.map(toModel),
+      total
+    };
   }
 };

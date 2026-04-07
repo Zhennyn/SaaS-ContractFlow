@@ -66,5 +66,45 @@ export const customersRepository = {
       .prepare('SELECT COUNT(*) as total FROM contracts WHERE customer_id = ? AND user_id = ?')
       .get(customerId, userId) as { total: number };
     return row.total;
+  },
+
+  /**
+   * Busca clientes com filtro de busca e pagination
+   */
+  findWithSearch(
+    userId: string,
+    options: {
+      search?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): { customers: Customer[]; total: number } {
+    const { search, limit = 50, offset = 0 } = options;
+
+    let whereClause = 'user_id = ?';
+    const params: any[] = [userId];
+
+    if (search) {
+      whereClause += " AND (name LIKE ? OR email LIKE ? OR company LIKE ?)";
+      const searchTerm = `%${search}%`;
+      params.push(searchTerm, searchTerm, searchTerm);
+    }
+
+    // Conta total
+    const countResult = db.prepare(
+      `SELECT COUNT(*) as count FROM customers WHERE ${whereClause}`
+    ).get(...params) as { count: number };
+
+    // Busca com paginação
+    const rows = db.prepare(
+      `SELECT * FROM customers WHERE ${whereClause}
+       ORDER BY created_at DESC
+       LIMIT ? OFFSET ?`
+    ).all(...params, limit, offset) as CustomerRow[];
+
+    return {
+      customers: rows.map(toModel),
+      total: countResult.count
+    };
   }
 };

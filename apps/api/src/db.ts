@@ -78,6 +78,32 @@ export function initializeDatabase() {
       revoked_at TEXT,
       FOREIGN KEY (user_id) REFERENCES users (id)
     );
+
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      action TEXT NOT NULL,
+      resource_type TEXT NOT NULL,
+      resource_id TEXT NOT NULL,
+      old_values TEXT,
+      new_values TEXT,
+      ip_address TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users (id)
+    );
+
+    CREATE TABLE IF NOT EXISTS contract_attachments (
+      id TEXT PRIMARY KEY,
+      contract_id TEXT NOT NULL,
+      file_name TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      mime_type TEXT NOT NULL,
+      uploaded_by TEXT NOT NULL,
+      uploaded_at TEXT NOT NULL,
+      FOREIGN KEY (contract_id) REFERENCES contracts (id),
+      FOREIGN KEY (uploaded_by) REFERENCES users (id)
+    );
   `);
 
   // Migrações incrementais — adicionam colunas sem recriar tabelas.

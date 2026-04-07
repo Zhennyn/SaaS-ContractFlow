@@ -4,9 +4,38 @@ import { customerSchema } from '../validators/customers.validator.js';
 import { customersService } from '../services/customers.service.js';
 import { ValidationError } from '../types/errors.js';
 
+function getString(val: any): string | undefined {
+  if (typeof val === 'string') return val;
+  if (Array.isArray(val)) return val[0];
+  return undefined;
+}
+
+function getNumber(val: any, def: number = 0): number {
+  const str = getString(val);
+  return str ? Math.max(0, Number(str)) : def;
+}
+
 export const customersController = {
   list(req: AuthRequest, res: Response, next: NextFunction) {
     try {
+      // Se houver query params de busca, usa search
+      if (req.query.search) {
+        const result = customersService.search(req.auth!.sub, {
+          search: getString(req.query.search),
+          limit: getNumber(req.query.limit, 50),
+          offset: getNumber(req.query.offset, 0)
+        });
+        return res.json({
+          data: result.customers,
+          pagination: {
+            limit: Math.min(getNumber(req.query.limit, 50), 500),
+            offset: getNumber(req.query.offset, 0),
+            total: result.total
+          }
+        });
+      }
+
+      // Caso contrário, retorna todos
       res.json(customersService.listForUser(req.auth!.sub));
     } catch (err) {
       next(err);

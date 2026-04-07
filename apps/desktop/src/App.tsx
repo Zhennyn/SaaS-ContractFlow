@@ -234,7 +234,7 @@ async function decryptSignedLicense(machineId: string) {
 }
 
 function App() {
-  const [apiUrl, setApiUrl] = useState(() => (isDevMode ? localStorage.getItem(apiStorageKey) ?? defaultApiUrl : defaultApiUrl));
+  const [apiUrl, setApiUrl] = useState(() => localStorage.getItem(apiStorageKey) ?? defaultApiUrl);
   const [session, setSession] = useState<UserSession | null>(null);
   const [machineId, setMachineId] = useState('');
   const [appVersion, setAppVersion] = useState('1.0.0');
@@ -335,9 +335,7 @@ function App() {
   }, [machineId]);
 
   useEffect(() => {
-    if (isDevMode) {
-      localStorage.setItem(apiStorageKey, apiUrl);
-    }
+    localStorage.setItem(apiStorageKey, apiUrl);
   }, [apiUrl]);
 
   useEffect(() => {
@@ -1160,12 +1158,10 @@ function App() {
           </div>
 
           <form className="form-grid" onSubmit={handleLogin}>
-            {isDevMode && (
-              <label>
-                API URL
-                <input value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} placeholder="http://localhost:4000" />
-              </label>
-            )}
+            <label>
+              API URL
+              <input value={apiUrl} onChange={(event) => setApiUrl(event.target.value)} placeholder="http://localhost:4000" />
+            </label>
             <label>
               Email
               <input value={loginEmail} onChange={(event) => setLoginEmail(event.target.value)} />

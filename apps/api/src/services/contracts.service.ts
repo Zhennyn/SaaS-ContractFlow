@@ -6,6 +6,7 @@ import {
   type ContractUpsertData
 } from '../repositories/contracts.repository.js';
 import { customersRepository } from '../repositories/customers.repository.js';
+import { auditService } from './audit.service.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -29,6 +30,28 @@ export const contractsService = {
     return contractsRepository.findAllByUser(userId);
   },
 
+  /**
+   * Busca contratos com filtros, busca por título e pagination
+   */
+  search(
+    userId: string,
+    options: {
+      status?: string;
+      clmStatus?: string;
+      search?: string;
+      limit?: number;
+      offset?: number;
+    }
+  ) {
+    return contractsRepository.findWithFilters(userId, {
+      status: options.status as any,
+      clmStatus: options.clmStatus as any,
+      search: options.search,
+      limit: options.limit ? Math.min(Number(options.limit), 500) : 50,
+      offset: options.offset ? Number(options.offset) : 0
+    });
+  },
+
   getByIdForUser(id: string, userId: string): Contract {
     const contract = contractsRepository.findById(id, userId);
     if (!contract) throw new NotFoundError('Contrato');
@@ -43,6 +66,20 @@ export const contractsService = {
     const id = uuid();
     const now = isoNow();
     const contract = contractsRepository.insert(id, userId, data, 'draft', now);
+    
+    auditService.logAction({
+      userId,
+      action: 'CONTRACT_CREATED',
+      resourceType: 'contract',
+      resourceId: id,
+      newValues: {
+        title: contract.title,
+        customerId: contract.customerId,
+        valueCents: contract.valueCents,
+        status: contract.status
+      }
+    });
+    
     logger.info('Contrato criado', { contractId: id, userId });
     return contract;
   },
@@ -59,14 +96,47 @@ export const contractsService = {
 
     const now = isoNow();
     contractsRepository.update(id, userId, data, now);
+    
+    const updated = contractsRepository.findById(id, userId)!;
+    auditService.logAction({
+      userId,
+      action: 'CONTRACT_UPDATED',
+      resourceType: 'contract',
+      resourceId: id,
+      oldValues: {
+        title: existing.title,
+        valueCents: existing.valueCents,
+        endDate: existing.endDate
+      },
+      newValues: {
+        title: updated.title,
+        valueCents: updated.valueCents,
+        endDate: updated.endDate
+      }
+    });
+    
     logger.info('Contrato atualizado', { contractId: id, userId });
-    return contractsRepository.findById(id, userId)!;
+    return updated;
   },
 
   delete(id: string, userId: string): void {
     const existing = contractsRepository.findById(id, userId);
     if (!existing) throw new NotFoundError('Contrato');
+    
     contractsRepository.delete(id, userId);
+    
+    auditService.logAction({
+      userId,
+      action: 'CONTRACT_DELETED',
+      resourceType: 'contract',
+      resourceId: id,
+      oldValues: {
+        title: existing.title,
+        customerId: existing.customerId,
+        valueCents: existing.valueCents
+      }
+    });
+    
     logger.info('Contrato excluido', { contractId: id, userId });
   },
 
@@ -89,6 +159,16 @@ export const contractsService = {
 
     const now = isoNow();
     contractsRepository.updateClmStatus(id, userId, targetClmStatus, now);
+    
+    auditService.logAction({
+      userId,
+      action: 'CONTRACT_CLM_STATUS_CHANGED',
+      resourceType: 'contract',
+      resourceId: id,
+      oldValues: { clmStatus: contract.clmStatus },
+      newValues: { clmStatus: targetClmStatus }
+    });
+    
     logger.info('Status CLM transicionado', { contractId: id, from: contract.clmStatus, to: targetClmStatus, userId });
     return contractsRepository.findById(id, userId)!;
   }

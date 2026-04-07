@@ -113,3 +113,50 @@ export interface DashboardPayload {
   metrics: DashboardMetrics;
   upcomingRenewals: Contract[];
 }
+
+export type AuditAction =
+  | 'CONTRACT_CREATED'
+  | 'CONTRACT_UPDATED'
+  | 'CONTRACT_DELETED'
+  | 'CONTRACT_CLM_STATUS_CHANGED'
+  | 'CUSTOMER_CREATED'
+  | 'CUSTOMER_UPDATED'
+  | 'CUSTOMER_DELETED'
+  | 'LICENSE_CREATED'
+  | 'LICENSE_UPDATED'
+  | 'LICENSE_DELETED'
+  | 'USER_LOGIN'
+  | 'USER_LOGOUT'
+  | 'USER_CREATED';
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  action: AuditAction;
+  resourceType: 'contract' | 'customer' | 'license' | 'user';
+  resourceId: string;
+  oldValues: Record<string, unknown> | null;
+  newValues: Record<string, unknown> | null;
+  ipAddress: string | null;
+  createdAt: string;
+}
+
+export interface AuditLogPayload {
+  action: AuditAction;
+  resourceType: AuditLog['resourceType'];
+  resourceId: string;
+  oldValues?: Record<string, unknown> | null;
+  newValues?: Record<string, unknown> | null;
+  ipAddress?: string | null;
+}
+
+export interface ContractAttachment {
+  id: string;
+  contractId: string;
+  fileName: string;
+  filePath: string;
+  fileSize: number;
+  mimeType: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}

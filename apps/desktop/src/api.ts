@@ -1,4 +1,4 @@
-import type { Contract, Customer, DashboardPayload, LicenseUpsertPayload, ManagedLicense, UserSession } from '@contractflow/shared';
+import type { Contract, Customer, DashboardPayload, LicenseUpsertPayload, ManagedLicense, UserSession, ContractAttachment } from '@contractflow/shared';
 import type { Contract, ContractClmStatus, Customer, DashboardPayload, LicenseUpsertPayload, ManagedLicense, UserSession } from '@contractflow/shared';
 
 export type LoginPayload = {
@@ -45,6 +45,30 @@ async function request<T>(apiUrl: string, path: string, init?: RequestInit, toke
   return response.json() as Promise<T>;
 }
 
+async function requestFormData<T>(
+  apiUrl: string,
+  path: string,
+  formData: FormData,
+  token?: string,
+  signal?: AbortSignal
+): Promise<T> {
+  const response = await fetch(`${apiUrl}${path}`, {
+    method: 'POST',
+    body: formData,
+    signal,
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ message: 'Erro inesperado.' }));
+    throw new ApiError(response.status, body.message ?? 'Erro inesperado.');
+  }
+
+  return response.json() as Promise<T>;
+}
+
 export const api = {
   login: (apiUrl: string, payload: LoginPayload) =>
     request<UserSession>(apiUrl, '/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
@@ -75,5 +99,36 @@ export const api = {
   resetLicenseMachine: (apiUrl: string, token: string, id: string) =>
     request<ManagedLicense>(apiUrl, `/licenses/${id}/reset-machine`, { method: 'POST' }, token),
   transitionClmStatus: (apiUrl: string, token: string, id: string, clmStatus: ContractClmStatus) =>
-    request<Contract>(apiUrl, `/contracts/${id}/clm-status`, { method: 'PATCH', body: JSON.stringify({ clmStatus }) }, token)
+    request<Contract>(apiUrl, `/contracts/${id}/clm-status`, { method: 'PATCH', body: JSON.stringify({ clmStatus }) }, token),
+
+  // Attachments (files)
+  uploadAttachment: (apiUrl: string, token: string, contractId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return requestFormData<ContractAttachment>(apiUrl, `/contracts/${contractId}/attachments`, formData, token);
+  },
+  getAttachments: (apiUrl: string, token: string, contractId: string) =>
+    request<ContractAttachment[]>(apiUrl, `/contracts/${contractId}/attachments`, undefined, token),
+  downloadAttachment: async (apiUrl: string, token: string, contractId: string, attachmentId: string) => {
+    const response = await fetch(`${apiUrl}/contracts/${contractId}/attachments/${attachmentId}/download`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({ message: 'Erro inesperado.' }));
+      throw new ApiError(response.status, body.message ?? 'Erro inesperado.');
+    }
+
+    const blob = await response.blob();
+    const contentDisposition = response.headers.get('Content-Disposition');
+    const fileName = contentDisposition
+      ? contentDisposition.split('filename="')[1]?.split('"')[0] || 'download'
+      : 'download';
+
+    return { blob, fileName };
+  },
+  deleteAttachment: (apiUrl: string, token: string, contractId: string, attachmentId: string) =>
+    request<void>(apiUrl, `/contracts/${contractId}/attachments/${attachmentId}`, { method: 'DELETE' }, token)
 };

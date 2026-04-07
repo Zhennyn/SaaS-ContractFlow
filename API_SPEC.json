@@ -1,0 +1,413 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ContractFlow API",
+    "version": "1.1.0",
+    "description": "Professional contract management platform with JWT auth, audit logs, and file management",
+    "contact": {
+      "name": "ContractFlow Team"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "description": "Local development"
+    }
+  ],
+  "paths": {
+    "/audit/resource/{resourceType}/{resourceId}": {
+      "get": {
+        "summary": "Get audit history for a resource",
+        "tags": ["Audit"],
+        "parameters": [
+          {
+            "name": "resourceType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["contract", "customer", "license", "user"]
+            }
+          },
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50, "maximum": 500 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "200": {
+            "description": "Audit logs for resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/AuditLog" }
+                    },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/audit/user": {
+      "get": {
+        "summary": "Get audit history for current user",
+        "tags": ["Audit"],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50, "maximum": 500 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "200": {
+            "description": "User's audit history"
+          }
+        }
+      }
+    },
+    "/audit/all": {
+      "get": {
+        "summary": "Get global audit history (admin only)",
+        "tags": ["Audit"],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50, "maximum": 500 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "200": {
+            "description": "All audit logs"
+          }
+        }
+      }
+    },
+    "/contracts": {
+      "get": {
+        "summary": "List contracts with optional filters",
+        "tags": ["Contracts"],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["active", "renewing", "expired"] }
+          },
+          {
+            "name": "clmStatus",
+            "in": "query",
+            "schema": { "type": "string", "enum": ["draft", "in_review", "approved", "signed"] }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search in title, description, customer name",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50, "maximum": 500 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "200": {
+            "description": "List of contracts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Contract" }
+                    },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contractId}/attachments": {
+      "post": {
+        "summary": "Upload file to contract",
+        "tags": ["Attachments"],
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "PDF file (max 50MB)"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "201": {
+            "description": "File uploaded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ContractAttachment" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List contract attachments",
+        "tags": ["Attachments"],
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "200": {
+            "description": "List of attachments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ContractAttachment" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contractId}/attachments/{attachmentId}/download": {
+      "get": {
+        "summary": "Download file",
+        "tags": ["Attachments"],
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "attachmentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "200": {
+            "description": "File content",
+            "content": {
+              "application/pdf": {}
+            }
+          }
+        }
+      }
+    },
+    "/contracts/{contractId}/attachments/{attachmentId}": {
+      "delete": {
+        "summary": "Delete attachment",
+        "tags": ["Attachments"],
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "attachmentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "204": {
+            "description": "Deleted successfully"
+          }
+        }
+      }
+    },
+    "/customers": {
+      "get": {
+        "summary": "List customers with optional search",
+        "tags": ["Customers"],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search in name, email, company",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50, "maximum": 500 }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": { "type": "integer", "default": 0 }
+          }
+        ],
+        "security": [{ "JWT": [] }],
+        "responses": {
+          "200": {
+            "description": "List of customers"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuditLog": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "action": {
+            "type": "string",
+            "enum": [
+              "CONTRACT_CREATED",
+              "CONTRACT_UPDATED",
+              "CONTRACT_DELETED",
+              "CONTRACT_CLM_STATUS_CHANGED",
+              "CUSTOMER_CREATED",
+              "CUSTOMER_UPDATED",
+              "CUSTOMER_DELETED",
+              "LICENSE_CREATED",
+              "LICENSE_UPDATED",
+              "USER_LOGIN",
+              "USER_LOGOUT"
+            ]
+          },
+          "resourceType": {
+            "type": "string",
+            "enum": ["contract", "customer", "license", "user"]
+          },
+          "resourceId": { "type": "string" },
+          "oldValues": { "type": ["object", "null"] },
+          "newValues": { "type": ["object", "null"] },
+          "ipAddress": { "type": ["string", "null"] },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ContractAttachment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "contractId": { "type": "string" },
+          "fileName": { "type": "string" },
+          "filePath": { "type": "string" },
+          "fileSize": { "type": "integer" },
+          "mimeType": { "type": "string" },
+          "uploadedBy": { "type": "string" },
+          "uploadedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Contract": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "customerId": { "type": "string" },
+          "customerName": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "valueCents": { "type": "integer" },
+          "startDate": { "type": "string", "format": "date" },
+          "endDate": { "type": "string", "format": "date" },
+          "renewalDate": { "type": "string", "format": "date" },
+          "status": { "type": "string", "enum": ["active", "renewing", "expired"] },
+          "clmStatus": { "type": "string", "enum": ["draft", "in_review", "approved", "signed"] },
+          "autoRenew": { "type": "boolean" },
+          "paymentCycle": { "type": "string", "enum": ["monthly", "quarterly", "yearly", "custom"] },
+          "notes": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "limit": { "type": "integer" },
+          "offset": { "type": "integer" },
+          "total": { "type": "integer" }
+        }
+      }
+    },
+    "securitySchemes": {
+      "JWT": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
