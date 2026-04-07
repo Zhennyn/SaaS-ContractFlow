@@ -44,15 +44,17 @@ if (customerCount.total === 0) {
 
   db.prepare(
     `INSERT INTO contracts (
-      id, user_id, customer_id, title, value_cents, start_date, end_date, renewal_date, status, auto_renew, payment_cycle, notes, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(uuid(), userId, customerA, 'Assessoria Contabil Premium', 249900, '2025-01-10', '2026-01-10', '2026-01-05', 'renewing', 1, 'yearly', 'Renovacao com reajuste previsto.', now, now);
+      id, user_id, customer_id, title, description, value_cents, start_date, end_date, renewal_date,
+      status, clm_status, auto_renew, payment_cycle, notes, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(uuid(), userId, customerA, 'Assessoria Contabil Premium', 'Servicos contabeis com cobertura fiscal e tributaria.', 249900, '2025-01-10', '2026-01-10', '2026-01-05', 'renewing', 'approved', 1, 'yearly', 'Renovacao com reajuste previsto.', now, now);
 
   db.prepare(
     `INSERT INTO contracts (
-      id, user_id, customer_id, title, value_cents, start_date, end_date, renewal_date, status, auto_renew, payment_cycle, notes, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(uuid(), userId, customerB, 'Gestao de Midia e Performance', 189900, '2025-06-01', '2026-06-01', '2026-05-15', 'active', 0, 'monthly', 'Cliente avalia aditivo de escopo.', now, now);
+      id, user_id, customer_id, title, description, value_cents, start_date, end_date, renewal_date,
+      status, clm_status, auto_renew, payment_cycle, notes, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(uuid(), userId, customerB, 'Gestao de Midia e Performance', 'Gestao completa de midia paga e organica para e-commerce.', 189900, '2025-06-01', '2026-06-01', '2026-05-15', 'active', 'signed', 0, 'monthly', 'Cliente avalia aditivo de escopo.', now, now);
 }
 
 console.log('Seed concluido.');

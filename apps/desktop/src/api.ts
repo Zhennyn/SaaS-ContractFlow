@@ -1,4 +1,5 @@
 import type { Contract, Customer, DashboardPayload, LicenseUpsertPayload, ManagedLicense, UserSession } from '@contractflow/shared';
+import type { Contract, ContractClmStatus, Customer, DashboardPayload, LicenseUpsertPayload, ManagedLicense, UserSession } from '@contractflow/shared';
 
 export type LoginPayload = {
   email: string;
@@ -9,6 +10,7 @@ export type LoginPayload = {
 
 export type CustomerPayload = Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>;
 export type ContractPayload = Omit<Contract, 'id' | 'customerName' | 'createdAt' | 'updatedAt'>;
+export type ContractPayload = Omit<Contract, 'id' | 'customerName' | 'clmStatus' | 'createdAt' | 'updatedAt'>;
 export type ManagedLicensePayload = LicenseUpsertPayload;
 
 export class ApiError extends Error {
@@ -71,5 +73,7 @@ export const api = {
   updateLicense: (apiUrl: string, token: string, id: string, payload: ManagedLicensePayload) =>
     request<ManagedLicense>(apiUrl, `/licenses/${id}`, { method: 'PUT', body: JSON.stringify(payload) }, token),
   resetLicenseMachine: (apiUrl: string, token: string, id: string) =>
-    request<ManagedLicense>(apiUrl, `/licenses/${id}/reset-machine`, { method: 'POST' }, token)
+    request<ManagedLicense>(apiUrl, `/licenses/${id}/reset-machine`, { method: 'POST' }, token),
+  transitionClmStatus: (apiUrl: string, token: string, id: string, clmStatus: ContractClmStatus) =>
+    request<Contract>(apiUrl, `/contracts/${id}/clm-status`, { method: 'PATCH', body: JSON.stringify({ clmStatus }) }, token)
 };

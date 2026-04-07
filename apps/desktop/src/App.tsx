@@ -71,6 +71,7 @@ const emptyCustomerForm: CustomerPayload = {
 const emptyContractForm: ContractPayload = {
   customerId: '',
   title: '',
+  description: '',
   valueCents: 0,
   startDate: '',
   endDate: '',
@@ -938,6 +939,26 @@ function App() {
       setMessage({ kind: 'success', text: 'Contrato removido.' });
     } catch (error) {
       setMessage({ kind: 'error', text: error instanceof Error ? error.message : 'Falha ao remover contrato.' });
+
+      async function handleClmTransition(contractId: string, targetStatus: import('@contractflow/shared').ContractClmStatus) {
+        if (!session) return;
+        setBusy(true);
+        try {
+          const activeSession = await executeWithSessionRetry(
+            async (currentSession) => {
+              await api.transitionClmStatus(apiUrl, currentSession.token, contractId, targetStatus);
+              return currentSession;
+            },
+            session
+          );
+          await refreshWorkspace(activeSession);
+          setMessage({ kind: 'success', text: `Status CLM atualizado para "${targetStatus}".` });
+        } catch (error) {
+          setMessage({ kind: 'error', text: error instanceof Error ? error.message : 'Falha ao atualizar status CLM.' });
+        } finally {
+          setBusy(false);
+        }
+      }
     } finally {
       setBusy(false);
     }
@@ -958,6 +979,7 @@ function App() {
     setContractForm({
       customerId: contract.customerId,
       title: contract.title,
+      description: contract.description,
       valueCents: contract.valueCents,
       startDate: contract.startDate,
       endDate: contract.endDate,
@@ -1491,6 +1513,14 @@ function App() {
           <span>Contratos expirados</span>
           <strong>{dashboard?.metrics.expiredContracts ?? 0}</strong>
         </article>
+        <article className="card stat-card">
+          <span>Em rascunho (CLM)</span>
+          <strong>{dashboard?.metrics.draftContracts ?? 0}</strong>
+        </article>
+        <article className="card stat-card">
+          <span>Em revisao (CLM)</span>
+          <strong>{dashboard?.metrics.pendingReviewContracts ?? 0}</strong>
+        </article>
       </section>
 
       <section className="card chart-card">
@@ -1654,6 +1684,10 @@ function App() {
                 Titulo
                 <input value={contractForm.title} onChange={(event) => setContractForm({ ...contractForm, title: event.target.value })} />
               </label>
+              <label className="full-width">
+                Descricao
+                <textarea value={contractForm.description} onChange={(event) => setContractForm({ ...contractForm, description: event.target.value })} rows={2} />
+              </label>
               <label>
                 Valor em centavos
                 <input
@@ -1751,6 +1785,7 @@ function App() {
                     <th>Cliente</th>
                     <th>Renovacao</th>
                     <th>Valor</th>
+                    <th>CLM</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -1761,6 +1796,26 @@ function App() {
                       <td>{contract.customerName}</td>
                       <td>{formatDate(contract.renewalDate)}</td>
                       <td>{formatCurrency(contract.valueCents)}</td>
+                      <td>
+                        <span className={`clm-badge clm-badge--${contract.clmStatus}`}>{contract.clmStatus.replace('_', ' ')}</span>
+                        {contract.clmStatus !== 'signed' && (
+                          <select
+                            className="clm-transition-select"
+                            value=""
+                            onChange={(event) => {
+                              if (event.target.value) {
+                                void handleClmTransition(contract.id, event.target.value as import('@contractflow/shared').ContractClmStatus);
+                              }
+                            }}
+                            disabled={busy}
+                          >
+                            <option value="">Avançar...</option>
+                            {({ draft: ['in_review'], in_review: ['draft', 'approved'], approved: ['signed'], signed: [] } as Record<string, string[]>)[contract.clmStatus]?.map((s) => (
+                              <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                            ))}
+                          </select>
+                        )}
+                      </td>
                       <td className="row-actions">
                         <button className="table-button" onClick={() => startContractEdit(contract)} type="button">
                           Editar

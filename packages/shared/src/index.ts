@@ -1,5 +1,7 @@
 export type LicenseStatus = 'active' | 'expired' | 'suspended';
 export type ContractStatus = 'active' | 'renewing' | 'expired';
+/** Status do ciclo de vida documental do contrato (CLM). */
+export type ContractClmStatus = 'draft' | 'in_review' | 'approved' | 'signed';
 export type PaymentCycle = 'monthly' | 'quarterly' | 'yearly' | 'custom';
 export type UserRole = 'owner' | 'agent';
 export type SignedLicenseAlgorithm = 'Ed25519';
@@ -83,11 +85,13 @@ export interface Contract {
   customerId: string;
   customerName: string;
   title: string;
+  description: string;
   valueCents: number;
   startDate: string;
   endDate: string;
   renewalDate: string;
   status: ContractStatus;
+  clmStatus: ContractClmStatus;
   autoRenew: boolean;
   paymentCycle: PaymentCycle;
   notes: string;
@@ -101,6 +105,8 @@ export interface DashboardMetrics {
   expiredContracts: number;
   monthlyRecurringRevenueCents: number;
   projectedRenewalValueCents: number;
+  draftContracts: number;
+  pendingReviewContracts: number;
 }
 
 export interface DashboardPayload {

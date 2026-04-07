@@ -11,6 +11,7 @@ Sistema desktop para gestão de contratos e renovação de licenças, com foco e
 - 🖥️ Aplicação desktop empacotada em .exe (Electron)
 - 📄 Gestão completa de clientes e contratos (CRUD)
 - 📅 Monitoramento de vencimentos e renovações prioritárias
+- 📋 **CLM — Contract Lifecycle Management:** ciclo de vida documental com estados `draft → in_review → approved → signed`, validação de transições no backend e badge colorido na interface
 - 🔔 Notificações locais de vencimento (30, 15, 7 e 1 dia) com ações de visto e adiar 24h
 - 📄 Exportação de relatório PDF de contratos com filtro atual, receita recorrente e contratos em risco
 - 📊 Dashboard com métricas de receita recorrente, contratos em risco e gráfico de Churn x MRR (últimos 6 meses)
@@ -76,6 +77,22 @@ Passo a passo:
     npm run package:desktop
 
 ## 🆕 Novidades da versão
+
+- **Arquitetura MVC completa no backend:**
+    - `repositories/` — acesso exclusivo ao banco de dados (better-sqlite3)
+    - `services/` — regras de negócio e validações (auth, contracts, customers, licenses, dashboard)
+    - `controllers/` — handlers HTTP finos, sem lógica de negócio
+    - `routes/` — montagem de rotas Express modular
+    - `middleware/` — autenticação JWT, tratamento global de erros, request logger
+    - `types/errors.ts` — hierarquia de `AppError` com subclasses tipadas
+    - `utils/logger.ts` — logger JSON estruturado com `LOG_LEVEL` configurável
+- **CLM (Contract Lifecycle Management):**
+    - Status: `draft` → `in_review` → `approved` → `signed` (terminal)
+    - Endpoint `PATCH /contracts/:id/clm-status` com validação de transição
+    - Badge colorido + dropdown de transição na tabela de contratos
+    - Cards no dashboard: rascunhos e contratos em revisão
+- Campo `description` em contratos
+
 
 - Notificações de vencimento no desktop:
     - Verificação automática ao abrir o app e em intervalo configurável (5 min, 15 min, 1h ou 3h).
