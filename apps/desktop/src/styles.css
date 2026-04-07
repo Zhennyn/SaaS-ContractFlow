@@ -140,6 +140,19 @@ button {
   align-items: center;
 }
 
+.inline-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #223027;
+  font-size: 0.8rem;
+}
+
+.inline-setting select {
+  min-width: 170px;
+  padding: 10px 12px;
+}
+
 .form-grid {
   display: grid;
   gap: 16px;
@@ -315,11 +328,125 @@ td {
   gap: 12px;
 }
 
+.renewal-toast {
+  align-items: center;
+}
+
+.pref-card {
+  border-left: 4px solid #1d533a;
+}
+
+.pref-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 28px;
+  margin-top: 8px;
+}
+
+.pref-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.threshold-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.threshold-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(29, 83, 58, 0.1);
+  color: #1d533a;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: #922c2c;
+  font-size: 1.1rem;
+  padding: 0 2px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.tag-remove:hover {
+  opacity: 1;
+}
+
+.threshold-add {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.threshold-add input {
+  width: 100px;
+}
+
+.hint {
+  font-size: 0.85rem;
+}
+
+.hint-ok {
+  color: #1d533a;
+  font-size: 0.85rem;
+}
+
+.hint-error {
+  color: #922c2c;
+  font-size: 0.85rem;
+}
+
+.toast-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.table-tools {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.chart-wrap {
+  height: 320px;
+  padding: 6px 4px 0;
+}
+
 @media (max-width: 1200px) {
   .auth-shell,
   .main-grid,
   .stats-grid,
-  .feature-grid {
+  .feature-grid,
+  .trend-grid,
+  .pref-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-tools {
     grid-template-columns: 1fr;
   }
 }
@@ -332,7 +459,8 @@ td {
   .topbar,
   .card-header,
   .topbar-actions,
-  .row-actions {
+  .row-actions,
+  .toast-actions {
     flex-direction: column;
     align-items: stretch;
   }

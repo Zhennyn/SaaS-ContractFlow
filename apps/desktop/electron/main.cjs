@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, Notification, dialog, ipcMain } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
@@ -23,6 +23,66 @@ ipcMain.handle('license:import-file', async () => {
   const filePath = result.filePaths[0];
   const content = await fs.readFile(filePath, 'utf8');
   return { filePath, content };
+});
+
+ipcMain.handle('desktop:notify', (_event, payload) => {
+  if (!Notification.isSupported()) {
+    return false;
+  }
+
+  const title = typeof payload?.title === 'string' ? payload.title : 'ContractFlow Suite';
+  const body = typeof payload?.body === 'string' ? payload.body : 'Voce possui notificacoes pendentes.';
+
+  const notification = new Notification({
+    title,
+    body,
+    urgency: 'normal',
+    silent: false
+  });
+
+  notification.show();
+  return true;
+});
+
+// Envia e-mails SMTP via nodemailer a partir do processo principal (Node.js).
+// As senhas ficam armazenadas localmente e nunca saem do dispositivo.
+ipcMain.handle('desktop:send-email-batch', async (_event, smtpConfig, messages) => {
+  if (
+    !smtpConfig ||
+    typeof smtpConfig.host !== 'string' ||
+    smtpConfig.host.trim().length === 0 ||
+    typeof smtpConfig.user !== 'string'
+  ) {
+    return { ok: false, error: 'Configuracao SMTP invalida.' };
+  }
+
+  const nodemailer = require('nodemailer');
+  const transporter = nodemailer.createTransport({
+    host: smtpConfig.host.trim(),
+    port: Number(smtpConfig.port) || 587,
+    secure: Boolean(smtpConfig.secure),
+    auth: {
+      user: smtpConfig.user,
+      pass: smtpConfig.password
+    }
+  });
+
+  const results = [];
+  for (const msg of Array.isArray(messages) ? messages : []) {
+    try {
+      await transporter.sendMail({
+        from: `ContractFlow Suite <${smtpConfig.user}>`,
+        to: String(msg.to),
+        subject: String(msg.subject),
+        html: String(msg.html)
+      });
+      results.push({ to: msg.to, ok: true });
+    } catch (err) {
+      results.push({ to: msg.to, ok: false, error: err.message });
+    }
+  }
+
+  return { ok: true, results };
 });
 
 function createWindow() {

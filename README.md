@@ -11,7 +11,9 @@ Sistema desktop para gestão de contratos e renovação de licenças, com foco e
 - 🖥️ Aplicação desktop empacotada em .exe (Electron)
 - 📄 Gestão completa de clientes e contratos (CRUD)
 - 📅 Monitoramento de vencimentos e renovações prioritárias
-- 📊 Dashboard com métricas de receita recorrente e contratos em risco
+- 🔔 Notificações locais de vencimento (30, 15, 7 e 1 dia) com ações de visto e adiar 24h
+- 📄 Exportação de relatório PDF de contratos com filtro atual, receita recorrente e contratos em risco
+- 📊 Dashboard com métricas de receita recorrente, contratos em risco e gráfico de Churn x MRR (últimos 6 meses)
 - 🧾 Licenciamento comercial com vínculo por máquina
 - 🔏 Importação e verificação de licença assinada local (.lic)
 - ⚙️ Ferramenta interna para emissão de licenças (CLI)
@@ -72,6 +74,19 @@ Passo a passo:
 7. Gerar executável Windows (opcional)
 
     npm run package:desktop
+
+## 🆕 Novidades da versão
+
+- Notificações de vencimento no desktop:
+    - Verificação automática ao abrir o app e em intervalo configurável (5 min, 15 min, 1h ou 3h).
+    - Alertas nativos do Electron + painel interno com ações "Marcar como visto" e "Adiar 24h".  - **Marcos de alerta configuráveis:** adicione ou remova dias (padrão: 30, 15, 7, 1) diretamente na interface, sem precisar editar código. Persistido localmente por dispositivo.
+  - **Envio de e-mail SMTP:** configure servidor, porta, usuário, senha e destinatário no painel "Preferências". Compatível com Gmail (App Password), Outlook, SendGrid SMTP e qualquer servidor padrão. Inclui botão "Testar conexão". Configurações armazenadas apenas no dispositivo local.- Relatório PDF de contratos:
+    - Botão Exportar PDF no dashboard e na lista de contratos.
+    - Inclui contratos do filtro atual, receita recorrente mensal, contratos em risco e data de geração.
+    - Cabeçalho ContractFlow Suite e rodapé com versão do app.
+- Dashboard analítico:
+    - Gráfico combinado de MRR e Churn mensal dos últimos 6 meses.
+    - Cards com MRR atual, churn atual e variação mês a mês.
 
 ## 📸 Screenshots
 
