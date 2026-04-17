@@ -109,22 +109,10 @@ Passo a passo:
 
 O projeto ainda está em desenvolvimento e as capturas serão adicionadas em breve.
 
-Sugestões de imagens para incluir na pasta img:
-
-- Tela de login e validação de licença
-- Dashboard principal com métricas
-- Lista de contratos com ações de edição
-- Fluxo de importação de licença assinada
-
 ## 🌐 Demonstração
 
 🔗 Em breve: link de demonstração pública
 
-Sugestão de publicação:
-
-- API em Azure App Service, Render ou Railway
-- Vídeo curto de demonstração no YouTube/Loom
-- GIF do fluxo principal no topo do README
 
 ## 📌 Sobre o projeto
 
